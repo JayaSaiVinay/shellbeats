@@ -3,7 +3,12 @@ import vlc
 
 from search import searchForSongs
 from player import playAudio
-LIMIT = 10
+from utils import displayResultsTable, playBackControls
+from rich.prompt import Prompt
+from rich.console import Console
+console = Console()
+
+LIMIT = 5
 
 parser = argparse.ArgumentParser()
 
@@ -13,18 +18,18 @@ parser.add_argument("--query", type=str, default="Metallica", help="Search query
 args = parser.parse_args()
 
 LIMIT = args.limit
-res = searchForSongs(args.query, LIMIT) 
+res = searchForSongs(args.query, LIMIT)
 
-for video in res:
-    print(f"[{video['id']+1}] {video['title']} ({video['duration']})")
-    print(f"     {video['link']}")
+displayResultsTable(res)
 
-choice = int(input("Enter your choice: "))
+choice = Prompt.ask("Enter your choice: ", choices=[str(i+1) for i in range(LIMIT)])
+choice = int(choice)
 choice_url = res[choice-1]['link'] 
-url = playAudio(choice_url)
-print(url)
+with console.status("⏳ Extracting stream and starting playback...", spinner="dots"):
+    url = playAudio(choice_url)
+console.print(f"✅ Now Playing: [bold cyan]{res[choice-1]['title']}[/]")
+
 player = vlc.MediaPlayer(url)
 player.play()
 
-input("🎵 Press Enter to stop playback...")
-player.stop()
+playBackControls(player)
