@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import vlc
 
@@ -8,21 +9,18 @@ from rich.prompt import Prompt
 from rich.console import Console
 console = Console()
 
-LIMIT = 5
+parser = argparse.ArgumentParser(description="🎧 ShellBeats - Terminal Music Player")
 
-parser = argparse.ArgumentParser()
-
-parser.add_argument("--limit", type=int, default=LIMIT, help="Number of videos to search")
-parser.add_argument("--query", type=str, default="Metallica", help="Search query")
+parser.add_argument("query", nargs="+", default="Metallica", type=str, help="Search query (e.g., 'john mayer')")
+parser.add_argument("limit", nargs="?", default=5, type=int, help="Number of videos to search")
 
 args = parser.parse_args()
-
-LIMIT = args.limit
-res = searchForSongs(args.query, LIMIT)
+ 
+res = searchForSongs(" ".join(args.query), args.limit)
 
 displayResultsTable(res)
 
-choice = Prompt.ask("Enter your choice: ", choices=[str(i+1) for i in range(LIMIT)])
+choice = Prompt.ask("Enter your choice: ", choices=[str(i+1) for i in range(args.limit)])
 choice = int(choice)
 choice_url = res[choice-1]['link'] 
 with console.status("⏳ Extracting stream and starting playback...", spinner="dots"):
