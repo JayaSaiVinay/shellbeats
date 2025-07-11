@@ -4,9 +4,10 @@ import vlc
 
 from search import searchForSongs
 from player import playAudio
-from utils import displayResultsTable, playBackControls
+from utils import displayResultsTable, playBackControls, startVisualizer, stopVisualizer
 from rich.prompt import Prompt
 from rich.console import Console
+
 console = Console()
 
 parser = argparse.ArgumentParser(description="🎧 ShellBeats - Terminal Music Player")
@@ -24,10 +25,11 @@ choice = Prompt.ask("Enter your choice: ", choices=[str(i+1) for i in range(args
 choice = int(choice)
 choice_url = res[choice-1]['link'] 
 with console.status("⏳ Extracting stream and starting playback...", spinner="dots"):
-    url = playAudio(choice_url)
-console.print(f"✅ Now Playing: [bold cyan]{res[choice-1]['title']}[/]")
-
+    url = playAudio(choice_url) 
+title = res[choice-1]['title']
 player = vlc.MediaPlayer(url)
 player.play()
+startVisualizer(title)
 
 playBackControls(player)
+stopVisualizer()
